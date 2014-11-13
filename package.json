@@ -1,0 +1,7 @@
+{
+    "name": "cs221-data-collector",
+    "version": "0.1.0",
+    "dependencies": {
+        "rapgenius-js": "0.1.2"
+    }
+}

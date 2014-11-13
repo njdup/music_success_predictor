@@ -1,0 +1,10 @@
+# Ignore node stuff
+node_modules/*
+
+*.swp
+*~
+*.pyc
+
+data/lyrics/all.json
+data/songs/song_names.json
+

@@ -15,7 +15,29 @@ GENRES = [
     'hip hop',
     'indie rock',
     'pop',
-    'r&b'
+    'r&b',
+    'folk',
+    'funk',
+    'pop house',
+    'pop rap',
+    'power pop',
+    'alternative hip hop',
+    'alternative pop',
+    'alternative r&b',
+    'alternative rock',
+    'broadway',
+    'christmas',
+    'classic rock',
+    'country blues',
+    'country rock',
+    'deep alternative r&b',
+    'hard rock',
+    'indie pop',
+    'jazz',
+    'metal',
+    'pop',
+    'pop rock',
+    'progressive metal',
 ]
 
 POPULARITY_RANGES = {
@@ -31,3 +53,17 @@ NUM_SONGS = 100
 SONGNAMES_FILE = 'songs/song_names.json'
 LYRICS_SCRIPT = 'collect_lyrics.js'
 LYRICS_FILE = 'lyrics/all.json'
+INPUTS_FILE = 'inputs/data.json'
+
+# List of features to grab from Echo Nest API info
+SONG_FEATURES = [
+    'tempo',
+    'danceability',
+    'energy',
+    'loudness',
+    'key',
+    'duration',
+    'time_signature',
+    'speechiness',
+    'liveness',
+]

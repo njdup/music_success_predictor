@@ -6,7 +6,11 @@ and metadata and lyrics for each song.
 import requests
 import settings
 import json
+import time
 from subprocess import call
+from pyechonest import song as SongAPI
+from pyechonest import config
+config.ECHO_NEST_API_KEY = settings.API_KEY
 
 SONGNAME_INDEX = 0
 ARTIST_INDEX = 1
@@ -99,6 +103,71 @@ def collect_song_lyrics(songs):
                 output.write(',\n')
         output.write('] }')
 
+def collect_song_data(songs):
+
+    with open(settings.INPUTS_FILE, 'w') as output:
+        output.write('{ "song_data": [ \n')
+        for index, song in enumerate(songs):
+            try:
+                song_results = SongAPI.search(artist=song[ARTIST_INDEX], title=song[SONGNAME_INDEX])
+            except:
+                # They're rate-limiting us. Fuck them, sleep for 60 seconds and try again
+                print 'Time to sleep...'
+                time.sleep(60)
+                print 'I\'m awake!'
+                song_results = SongAPI.search(artist=song[ARTIST_INDEX], title=song[SONGNAME_INDEX])
+
+            if not song_results: continue
+            song_info = song_results[0]
+
+            try:
+                audio_summary = song_info.get_audio_summary()
+            except:
+                print 'I\'m sleeping!'
+                time.sleep(60)
+                print 'I\'m awake!'
+                audio_summary = song_info.get_audio_summary()
+
+            features = {feature: audio_summary[feature] for feature in settings.SONG_FEATURES}
+
+            features['genre'] = song[GENRE_INDEX]
+            features['artist'] = song[ARTIST_INDEX]
+
+            try:
+                features['artist_familiarity'] = song_info.get_artist_familiarity()
+            except:
+                print 'I\'m sleeping!'
+                time.sleep(60)
+                print 'I\'m awake'
+                features['artist_familiarity'] = song_info.get_artist_familiarity()
+
+            try:
+                features['artist_hotttnesss'] = song_info.get_artist_hotttnesss()
+            except:
+                print 'I\'m sleeping!'
+                time.sleep(60)
+                print 'I\'m awake'
+                features['artist_hotttnesss'] = song_info.get_artist_hotttnesss()
+
+            try:
+                song_hotttnesss = song_info.get_song_hotttnesss()
+            except:
+                print 'I\'m sleeping!'
+                time.sleep(60)
+                print 'I\'m awake!'
+                song_hotttnesss = song_info.get_song_hotttnesss()
+
+            print 'Info for song {song}: \n\n features: {features} \n\n hotttnesss: {hotttnesss}'.format(
+                song = song[SONGNAME_INDEX].encode('utf-8'),
+                features = features,
+                hotttnesss = song_hotttnesss
+            )
+            data = (song[SONGNAME_INDEX], features, song_hotttnesss)
+            output.write(json.dumps(data))
+            if index != len(songs) - 1:
+                output.write(',\n')
+        output.write('] }')
+
 if __name__ == '__main__':
 
     # First collect a list of songs + song names
@@ -112,8 +181,12 @@ if __name__ == '__main__':
     print '{} songs collected'.format(len(songs))
     write_out_song_info(songs)
 
+    """
     print '\nCollecting song lyrics...'
     collect_song_lyrics(songs)
     print 'Done'
+    """
+
+    collect_song_data(songs)
 
     #write_out_song_info(songs)

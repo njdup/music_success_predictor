@@ -8,6 +8,9 @@ API_KEY = '0AUAGZNQLKRLAILXK'
 LYRICS_API = 'http://api.musixmatch.com/ws/1.1/track.lyrics.get'
 LYRICS_API_KEY = 'ce40d0b7a1bf18d71cf8e006d2a8a8b7'
 
+METROLYRICS_BASE = 'http://www.metrolyrics.com'
+LYRICS_SECTION = 'lyrics-body-text'
+
 GENRES = [
     'rap',
     'rock',

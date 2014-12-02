@@ -7,6 +7,7 @@ import requests
 import settings
 import json
 import time
+import re
 from subprocess import call
 from pyechonest import song as SongAPI
 from pyechonest import config
@@ -28,7 +29,12 @@ def get_popular_song_names(genre):
     response = requests.get(settings.MUSIC_INFO_API, params=data).json()
     data = response['response']
     for song in data['songs']:
-        songs.add((song['title'], song['artist_name'], genre))
+        # get rid of anything in parens () or brackets []
+        title = re.sub(r'\[((\w\s)+)\]', '', song['title'])
+        title = re.sub(r'\((\w+)\)', '', title)
+        print title
+
+        songs.add((title, song['artist_name'], genre))
 
     return songs
 
@@ -101,7 +107,7 @@ def collect_song_lyrics(songs):
             output.write(json.dumps({song[SONGNAME_INDEX] + song[ARTIST_INDEX]: lyrics}))
             if index != len(songs) - 1:
                 output.write(',\n')
-        output.write('] }')
+        output.write('\n]\n }')
 
 def collect_song_data(songs):
 
@@ -187,6 +193,6 @@ if __name__ == '__main__':
     print 'Done'
     """
 
-    collect_song_data(songs)
+    #collect_song_data(songs)
 
     #write_out_song_info(songs)

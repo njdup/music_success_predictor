@@ -11,6 +11,7 @@ I may consider other sites if the success rate on metrolyrics is low.
 import settings
 import string
 import json
+import time
 
 from bs4 import BeautifulSoup, NavigableString
 from urllib2 import urlopen
@@ -18,8 +19,8 @@ from urllib2 import urlopen
 class LyricsScraper(object):
     """ Class to encapsulate functionality of scraping lyrics """
     def __init__(self, song_title, song_artist):
-        self.song_title = song_title.replace(' ', '-')
-        self.song_artist = song_artist.replace(' ', '-')
+        self.song_title = song_title.strip().replace(' ', '-')
+        self.song_artist = song_artist.strip().replace(' ', '-')
         self.lyrics = None
 
     def load_song_html(self):
@@ -34,7 +35,11 @@ class LyricsScraper(object):
         html = urlopen(lyrics_url).read()
         soup = BeautifulSoup(html)
         lyrics_section = soup.find(id=settings.LYRICS_SECTION)
-        self.lyrics = lyrics_section
+
+        if not lyrics_section:
+            raise Exception('Song lyrics non-existent')
+        else:
+            self.lyrics = lyrics_section
 
     def get_lyrics(self):
         """
@@ -66,7 +71,7 @@ class LyricsScraper(object):
 
 def load_songs():
     """ Load the list of songs/artist names to grab lyrics for """
-    #return [{'title': 'chum', 'artist': 'earl sweatshirt'}]
+    #return [{'title': 'wwordsss', 'artist': 'earl sweatshirt'}]
     result = []
     with open(settings.SONGNAMES_FILE, 'r') as song_data:
         songs = json.load(song_data)
@@ -76,19 +81,37 @@ def load_songs():
 
 def save_lyrics(songs):
     """ Saves lyrics for all given songs to the results file """
+    lyrics_collected = 0
     with open(settings.LYRICS_FILE, 'w') as outfile:
         outfile.write('{ "lyrics": [ \n')
         for index, song in enumerate(songs):
-            lyrics = '\n'.join(get_lyrics(song))
+            lyrics = get_lyrics(song)
+            if not lyrics: continue
+
+            lyrics_collected += 1
+            lyrics = '\n'.join(lyrics)
             outfile.write(json.dumps({' '.join([song['title'], song['artist']]): lyrics}))
             if index != len(songs)-1:
                 outfile.write(',\n')
+
+            time.sleep(1) # Pause for a second to give their servers room to breath
+
         outfile.write('] }')
+
+    print '{} lyrics successfully collected.'.format(lyrics_collected)
 
 def get_lyrics(song):
     """ Get lyrics for the given song """
     scraper = LyricsScraper(song['title'], song['artist'])
-    scraper.load_song_html() # Raise exception to detect error?
+    try:
+        scraper.load_song_html() #
+    except Exception:
+        print 'Lyrics for {title} by {artist} not found.'.format(
+            title=song['title'].encode('utf-8'),
+            artist=song['artist'].encode('utf-8')
+        )
+        return None
+
     lyrics = scraper.get_lyrics()
     return lyrics
 

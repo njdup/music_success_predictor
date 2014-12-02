@@ -30,9 +30,8 @@ def get_popular_song_names(genre):
     data = response['response']
     for song in data['songs']:
         # get rid of anything in parens () or brackets []
-        title = re.sub(r'\[((\w\s)+)\]', '', song['title'])
-        title = re.sub(r'\((\w+)\)', '', title)
-        print title
+        title = re.sub(r'\[(.*)\]', '', song['title'])
+        title = re.sub(r'\((.*)\)', '', title)
 
         songs.add((title, song['artist_name'], genre))
 
